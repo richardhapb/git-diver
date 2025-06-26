@@ -1,0 +1,17 @@
+[workspace]
+members = ["crates/*"]
+resolver = "2"
+
+[workspace.package]
+name = "git-diver"
+version = "0.1.0"
+edition = "2024"
+
+[workspace.dependencies]
+git2 = "0.20.2"
+tracing = "0.1.41"
+tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
+chrono = "0.4.41"
+
+git_changes = {path="crates/git_changes"}
+config = {path="crates/config"}

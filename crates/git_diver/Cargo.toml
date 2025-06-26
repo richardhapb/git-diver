@@ -1,0 +1,18 @@
+[package]
+name = "git_diver"
+version.workspace = true
+edition.workspace = true
+publish = true
+
+[[bin]]
+name = "git_diver"
+path = "src/main.rs"
+
+[dependencies]
+git2 = {workspace = true}
+chrono = {workspace = true}
+tracing = {workspace = true}
+tracing-subscriber = {workspace = true}
+
+git_changes = {workspace = true}
+config = {workspace = true}
