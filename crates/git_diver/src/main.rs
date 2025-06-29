@@ -2,6 +2,7 @@ use std::fs::File;
 
 use crate::filters::Filterable;
 
+use chrono::{Datelike, Local, NaiveDate};
 use config::Config;
 use git_changes::{get_commits_by_email, get_unmerged_commits};
 use git2::Time;
@@ -22,19 +23,13 @@ fn main() -> Result<(), git2::Error> {
     debug!("Initializing application");
 
     let config = Config::from_file(None).expect("valid config file");
+    let first_day = get_target_first_day().and_hms_opt(0, 0, 0).unwrap();
+    let time = Time::new(first_day.and_utc().timestamp().into(), 0);
 
     for repo in config.get_repos() {
         debug!(%repo.author_email, "Retrieving messages by email");
         info!(%repo.path ,"Retrieving data for repo");
         let messages = get_commits_by_email(&repo.path, &repo.author_email, &repo.branch)?;
-        let time = Time::new(
-            chrono::NaiveDateTime::parse_from_str("2025-06-01 00:00", "%Y-%m-%d %H:%M")
-                .expect("parsed timestamp")
-                .and_utc()
-                .timestamp()
-                .into(),
-            0,
-        );
         let filtered = messages.since(time);
 
         println!("\n\nREPOSITORY: {}\n", repo.path);
@@ -63,4 +58,24 @@ fn main() -> Result<(), git2::Error> {
     }
 
     Ok(())
+}
+
+/// Calculate the first day of the month. If the month is beginning (day < 5),
+/// return the first day of the previous month; otherwise, return the first day of the current month.
+fn get_target_first_day() -> NaiveDate {
+    let today = Local::now().date_naive();
+    let year = today.year();
+    let month = today.month();
+
+    if today.day() < 5 {
+        // Get previous month
+        if month == 1 {
+            NaiveDate::from_ymd_opt(year - 1, 12, 1).unwrap()
+        } else {
+            NaiveDate::from_ymd_opt(year, month - 1, 1).unwrap()
+        }
+    } else {
+        // First day of current month
+        NaiveDate::from_ymd_opt(year, month, 1).unwrap()
+    }
 }
