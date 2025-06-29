@@ -13,6 +13,7 @@ pub struct Repo {
     pub author_email: String,
     pub path: String,
     pub branch: String,
+    pub ignored_branches: Option<Vec<String>>,
 }
 
 struct ConfigPath(String);
